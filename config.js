@@ -15,7 +15,7 @@ window.BUDDYCHAT_CONFIG = {
     apiKey: "AIzaSyDnBayCk5Kkj4Qbq9EC-GIWsuWnacllTqI",
     authDomain: "buddy-chat1.firebaseapp.com",
     projectId: "buddy-chat1",
-    storageBucket: "buddy-chat1.firebasestorage.app",
+    storageBucket: "buddy-chat1.appspot.com",
     messagingSenderId: "315056860700",
     appId: "1:315056860700:web:6be1541d2f35d6be4a79d9",
     measurementId: "G-EQ5BP5FPVK"
