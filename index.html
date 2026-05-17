@@ -207,17 +207,16 @@ function renderAuth(){
       if (!email.value || !pass.value) return toast("Email and password required");
       if (!FB_READY) { demoSignIn(name.value||email.value.split("@")[0], email.value, phone.value); return; }
       try{
-        if (mode.v==="signup"){
-          const cred = await auth.createUserWithEmailAndPassword(email.value, pass.value);
-          await cred.user.updateProfile({displayName:name.value});
-          await cred.user.sendEmailVerification();
-          await db.collection("users").doc(cred.user.uid).set({
-            uid:cred.user.uid, name:name.value, email:email.value, phone:phone.value,
-            photoURL:"", about:"Hey there! I'm using BuddyChat.", behaviour:{msgs:0,calls:0,stories:0},
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          },{merge:true});
-          toast("Verification email sent — check your inbox.");
-        } else {
+       if (mode.v==="signup"){
+           const cred = await auth.createUserWithEmailAndPassword(email.value, pass.value);
+           await cred.user.updateProfile({displayName:name.value});
+           await db.collection("users").doc(cred.user.uid).set({
+             uid:cred.user.uid, name:name.value, email:email.value, phone:phone.value,
+             photoURL:"", about:"Hey there! I'm using BuddyChat.", behaviour:{msgs:0,calls:0,stories:0},
+             createdAt: firebase.firestore.FieldValue.serverTimestamp()
+           },{merge:true});
+           toast("Account created.");
+         } else {
           await auth.signInWithEmailAndPassword(email.value, pass.value);
         }
       }catch(e){ toast(e.message||"Auth failed"); }
@@ -225,10 +224,16 @@ function renderAuth(){
 
   const google = el("button",{class:"btn-ghost w-full tap flex items-center justify-center gap-2",onclick:async()=>{
       if (!FB_READY) { demoSignIn("Google User","google@example.com",""); return; }
+      // Firebase auth sessions don't persist inside sandboxed iframes
+      // (Lovable preview, in-app browsers). Break out to a top-level tab
+      // so the redirect lands on a real top-level window with working storage.
+      if (window.self !== window.top){
+        window.open(location.href, "_blank", "noopener");
+        toast("Opened sign-in in a new tab");
+        return;
+      }
       const prov = new firebase.auth.GoogleAuthProvider();
       prov.setCustomParameters({ prompt: "select_account" });
-      // Popups are blocked inside sandboxed iframes (Lovable preview, in-app
-      // browsers, etc.) — try popup first, fall back to a full redirect.
       try{
         await auth.signInWithPopup(prov);
       }catch(e){
@@ -835,16 +840,12 @@ function openProfile(){
     if (FB_READY && auth.currentUser) await db.collection("users").doc(auth.currentUser.uid).set(me,{merge:true});
     recomputeGlow(); toast("Saved");
   }},"Save");
-  const verify = el("button",{class:"btn-ghost tap",onclick:async()=>{
-    if (!FB_READY) return toast("Demo mode");
-    try{ await auth.currentUser.sendEmailVerification(); toast("Verification email sent"); }catch(e){ toast(e.message); }
-  }},"Resend email verification");
   const out = el("button",{class:"btn-ghost tap text-[var(--danger)]",onclick:async()=>{ try{ FB_READY && await auth.signOut(); }catch{} localStorage.removeItem("bc_me"); location.reload(); }},"Sign out");
   pane.append(head,av, el("div",{class:"px-6 space-y-3 max-w-md mx-auto w-full"},
     el("label",{class:"text-xs text-[var(--text-dim)]"},"Name"), nameI,
     el("label",{class:"text-xs text-[var(--text-dim)]"},"Phone"), phoneI,
     el("label",{class:"text-xs text-[var(--text-dim)]"},"About"), aboutI,
-    el("div",{class:"flex gap-2 pt-2"}, save, verify), el("div",{class:"pt-4"}, out)
+    el("div",{class:"flex gap-2 pt-2"}, save), el("div",{class:"pt-4"}, out)
   ));
 }
 function openMenu(){
@@ -937,19 +938,8 @@ if (FB_READY){
     me.uid = u.uid; LS.set("me", me); State.user=u; State.profile=me;
     try{ await db.collection("users").doc(u.uid).set(me,{merge:true}); }catch{}
 
-    // Open the app immediately. Email verification is encouraged, not enforced
-    // — show a dismissible banner instead of bouncing the user back to login.
+    // Email verification is disabled — open the app immediately.
     boot();
-    if (!u.emailVerified && u.providerData[0]?.providerId==="password"){
-      setTimeout(()=>{
-        const bar = el("div",{class:"toast fixed top-3 left-1/2 -translate-x-1/2 z-[100] glass px-4 py-2 rounded-full text-xs flex items-center gap-3"},
-          el("span",{},"Verify your email to unlock everything"),
-          el("button",{class:"underline text-[var(--accent)]",onclick:async()=>{ try{ await u.sendEmailVerification(); toast("Verification email sent"); }catch(e){ toast(e.message||"Failed"); } }},"Resend"),
-          el("button",{class:"text-[var(--text-dim)]",onclick:()=>bar.remove()},"✕")
-        );
-        document.body.append(bar);
-      }, 600);
-    }
     if (!me.phone){
       // Non-blocking phone prompt (modal instead of window.prompt which is
       // blocked / unreliable inside sandboxed iframes).
