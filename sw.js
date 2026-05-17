@@ -1,16 +1,15 @@
 /* BuddyChat service worker — offline shell + push notifications */
 const CACHE = "buddychat-v1";
 const SHELL = [
-  "./",
-  "./index.html",
-  "./config.js",
-  "./manifest.json",
-  "./icons/icon-72.png",
-  "./icons/icon-96.png",
-  "./icons/icon-128.png",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/maskable.png",
+  "index.html",
+  "config.js",
+  "manifest.json",
+  "icons/icon-72.png",
+  "icons/icon-96.png",
+  "icons/icon-128.png",
+  "icons/icon-192.png",
+  "icons/icon-512.png",
+  "icons/maskable.png",
 ];
 
 self.addEventListener("install", (e) => {
@@ -37,7 +36,7 @@ self.addEventListener("fetch", (e) => {
         const copy = r.clone();
         caches.open(CACHE).then((c) => c.put(req, copy));
         return r;
-      }).catch(() => caches.match("./index.html"))
+      }).catch(() => caches.match("index.html"))
     );
     return;
   }
@@ -63,8 +62,8 @@ self.addEventListener("push", (e) => {
   const title = n.title || "BuddyChat";
   const opts = {
     body: n.body || "",
-    icon: "./icons/icon-192.png",
-    badge: "./icons/icon-96.png",
+    icon: "icons/icon-192.png",
+    badge: "icons/icon-96.png",
     vibrate: [80, 40, 80],
     data: data.data || {},
     tag: (data.data && data.data.tag) || "buddychat",
@@ -76,6 +75,6 @@ self.addEventListener("notificationclick", (e) => {
   e.notification.close();
   e.waitUntil(clients.matchAll({ type: "window" }).then((cs) => {
     for (const c of cs) { if ("focus" in c) return c.focus(); }
-    if (clients.openWindow) return clients.openWindow("./index.html");
+    if (clients.openWindow) return clients.openWindow("index.html");
   }));
 });
