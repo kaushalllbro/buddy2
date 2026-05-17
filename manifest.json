@@ -2,8 +2,7 @@
   "name": "BuddyChat",
   "short_name": "BuddyChat",
   "description": "Chat, stories, calls and moments — all in one place.",
-  "start_url": "/buddychat/index.html",
-  "scope": "/buddychat/",
+  "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0b141a",
@@ -18,8 +17,8 @@
     { "src": "icons/maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "New Chat",   "url": "/buddychat/index.html#chats",   "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Stories",    "url": "/buddychat/index.html#stories", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Camera",     "url": "/buddychat/index.html#camera",  "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "New Chat",   "url": "index.html#chats",   "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Stories",    "url": "index.html#stories", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Camera",     "url": "index.html#camera",  "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }
